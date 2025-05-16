@@ -1,0 +1,143 @@
+<!DOCTYPE html>
+<html lang="zh">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>每日名言 - 思想的火花</title>
+    <link rel="stylesheet" href="styles.css">
+</head>
+<body>
+    <div class="container">
+        <header>
+            <h1>每日名言</h1>
+            <div class="subtitle">汇聚思想的火花，点亮前行的道路</div>
+        </header>
+
+        <nav style="margin-bottom: 20px; text-align: center;">
+            <a href="index.html" style="color: #6e8efb; text-decoration: none; font-weight: bold; border-bottom: 2px solid #6e8efb; padding-bottom: 3px; margin-right: 20px;">首页</a>
+            <a href="quotes.html" style="color: #6e8efb; text-decoration: none; font-weight: bold;">名言集锦</a>
+        </nav>
+
+        <div class="category-buttons">
+            <button class="category-btn active" data-category="all">全部</button>
+            <button class="category-btn" data-category="inspiration">励志</button>
+            <button class="category-btn" data-category="wisdom">智慧</button>
+            <button class="category-btn" data-category="life">生活</button>
+            <button class="category-btn" data-category="success">成功</button>
+        </div>
+
+        <div class="quote-container">
+            <div class="quote" id="quote-text">人生就像一场马拉松，重要的不是瞬间的爆发，而是途中的坚持。</div>
+            <div class="author" id="quote-author">— 佚名</div>
+        </div>
+
+        <button class="btn" id="new-quote-btn">换一条名言</button>
+    </div>
+
+    <footer>
+        <p>© 2023 每日名言博客 | 由 <a href="https://github.com/buptLiYangCode" target="_blank">buptLiYangCode</a> 创建</p>
+    </footer>
+
+    <script>
+        // 名言数据
+        const quotes = [
+            {
+                text: "人生就像一场马拉松，重要的不是瞬间的爆发，而是途中的坚持。",
+                author: "佚名",
+                category: "inspiration"
+            },
+            {
+                text: "没有人可以回到过去重新开始，但谁都可以从现在开始，书写一个全然不同的结局。",
+                author: "卡耐基",
+                category: "inspiration"
+            },
+            {
+                text: "当你感到悲伤痛苦时，最好是去学些什么东西。学习会使你永远立于不败之地。",
+                author: "居里夫人",
+                category: "wisdom"
+            },
+            {
+                text: "生活中最大的幸福是坚信有人爱我们。",
+                author: "雨果",
+                category: "life"
+            },
+            {
+                text: "人生的价值，并不是用时间，而是用深度去衡量的。",
+                author: "列夫·托尔斯泰",
+                category: "wisdom"
+            },
+            {
+                text: "成功不是将来才有的，而是从决定去做的那一刻起，持续累积而成。",
+                author: "佚名",
+                category: "success"
+            },
+            {
+                text: "生命不等于是呼吸，生命是活动。",
+                author: "卢梭",
+                category: "life"
+            },
+            {
+                text: "伟大的事业不是靠力气、速度和身体的敏捷完成的，而是靠性格、意志和知识的力量完成的。",
+                author: "塞缪尔·约翰逊",
+                category: "success"
+            },
+            {
+                text: "读一本好书，就是和许多高尚的人谈话。",
+                author: "歌德",
+                category: "wisdom"
+            },
+            {
+                text: "人的一生可能燃烧也可能腐朽，我不能腐朽，我愿意燃烧起来！",
+                author: "奥斯特洛夫斯基",
+                category: "inspiration"
+            }
+        ];
+
+        // 当前类别
+        let currentCategory = "all";
+
+        // 显示随机名言
+        function showRandomQuote() {
+            let availableQuotes = quotes;
+            
+            // 筛选指定类别的名言
+            if (currentCategory !== "all") {
+                availableQuotes = quotes.filter(quote => quote.category === currentCategory);
+            }
+            
+            // 随机选择一条名言
+            const randomIndex = Math.floor(Math.random() * availableQuotes.length);
+            const randomQuote = availableQuotes[randomIndex];
+            
+            // 更新 DOM
+            document.getElementById("quote-text").textContent = randomQuote.text;
+            document.getElementById("quote-author").textContent = `— ${randomQuote.author}`;
+        }
+
+        // 绑定事件
+        document.getElementById("new-quote-btn").addEventListener("click", showRandomQuote);
+
+        // 类别按钮事件
+        document.querySelectorAll(".category-btn").forEach(button => {
+            button.addEventListener("click", function() {
+                // 移除所有按钮的 active 类
+                document.querySelectorAll(".category-btn").forEach(btn => {
+                    btn.classList.remove("active");
+                });
+                
+                // 添加当前按钮的 active 类
+                this.classList.add("active");
+                
+                // 更新当前类别
+                currentCategory = this.getAttribute("data-category");
+                
+                // 显示新的名言
+                showRandomQuote();
+            });
+        });
+
+        // 初始化显示一条随机名言
+        showRandomQuote();
+    </script>
+</body>
+</html> 

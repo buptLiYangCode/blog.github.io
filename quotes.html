@@ -1,0 +1,207 @@
+<!DOCTYPE html>
+<html lang="zh">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>名言集锦 - 每日名言</title>
+    <link rel="stylesheet" href="styles.css">
+</head>
+<body>
+    <div class="container">
+        <header>
+            <h1>名言集锦</h1>
+            <div class="subtitle">汇聚古今中外经典智慧</div>
+        </header>
+
+        <nav style="margin-bottom: 20px; text-align: center;">
+            <a href="index.html" style="margin-right: 20px; color: #6e8efb; text-decoration: none; font-weight: bold;">首页</a>
+            <a href="quotes.html" style="color: #6e8efb; text-decoration: none; font-weight: bold; border-bottom: 2px solid #6e8efb; padding-bottom: 3px;">名言集锦</a>
+        </nav>
+
+        <div class="category-buttons">
+            <button class="category-btn active" data-category="all">全部</button>
+            <button class="category-btn" data-category="inspiration">励志</button>
+            <button class="category-btn" data-category="wisdom">智慧</button>
+            <button class="category-btn" data-category="life">生活</button>
+            <button class="category-btn" data-category="success">成功</button>
+        </div>
+
+        <div class="quotes-section" id="quotes-container">
+            <!-- 名言卡片会通过JavaScript动态生成 -->
+        </div>
+    </div>
+
+    <footer>
+        <p>© 2023 每日名言博客 | 由 <a href="https://github.com/buptLiYangCode" target="_blank">buptLiYangCode</a> 创建</p>
+    </footer>
+
+    <script>
+        // 名言数据
+        const quotes = [
+            {
+                text: "人生就像一场马拉松，重要的不是瞬间的爆发，而是途中的坚持。",
+                author: "佚名",
+                category: "inspiration"
+            },
+            {
+                text: "没有人可以回到过去重新开始，但谁都可以从现在开始，书写一个全然不同的结局。",
+                author: "卡耐基",
+                category: "inspiration"
+            },
+            {
+                text: "当你感到悲伤痛苦时，最好是去学些什么东西。学习会使你永远立于不败之地。",
+                author: "居里夫人",
+                category: "wisdom"
+            },
+            {
+                text: "生活中最大的幸福是坚信有人爱我们。",
+                author: "雨果",
+                category: "life"
+            },
+            {
+                text: "人生的价值，并不是用时间，而是用深度去衡量的。",
+                author: "列夫·托尔斯泰",
+                category: "wisdom"
+            },
+            {
+                text: "成功不是将来才有的，而是从决定去做的那一刻起，持续累积而成。",
+                author: "佚名",
+                category: "success"
+            },
+            {
+                text: "生命不等于是呼吸，生命是活动。",
+                author: "卢梭",
+                category: "life"
+            },
+            {
+                text: "伟大的事业不是靠力气、速度和身体的敏捷完成的，而是靠性格、意志和知识的力量完成的。",
+                author: "塞缪尔·约翰逊",
+                category: "success"
+            },
+            {
+                text: "读一本好书，就是和许多高尚的人谈话。",
+                author: "歌德",
+                category: "wisdom"
+            },
+            {
+                text: "人的一生可能燃烧也可能腐朽，我不能腐朽，我愿意燃烧起来！",
+                author: "奥斯特洛夫斯基",
+                category: "inspiration"
+            },
+            {
+                text: "不要等待机会，而要创造机会。",
+                author: "林肯",
+                category: "success"
+            },
+            {
+                text: "世界上那些最容易的事情中，拖延时间最不费力。",
+                author: "佚名",
+                category: "wisdom"
+            },
+            {
+                text: "忘掉失败，不过要牢记失败中的教训。",
+                author: "赫伯特",
+                category: "wisdom"
+            },
+            {
+                text: "人的价值，在遭受诱惑的一瞬间被决定。",
+                author: "奥斯卡·王尔德",
+                category: "wisdom"
+            },
+            {
+                text: "把你的脸迎向阳光，那就不会有阴影。",
+                author: "海伦·凯勒",
+                category: "inspiration"
+            },
+            {
+                text: "只有经历过地狱般的磨砺，才能炼就创造天堂的力量。只有流过血的手指，才能弹奏出世间的绝响。",
+                author: "泰戈尔",
+                category: "inspiration"
+            },
+            {
+                text: "人生如同故事。重要的并不在有多长，而是在有多好。",
+                author: "塞内卡",
+                category: "life"
+            },
+            {
+                text: "一个人即使已登上顶峰，也仍要自强不息。",
+                author: "罗素·贝克",
+                category: "success"
+            },
+            {
+                text: "最困难的事情就是认识自己。",
+                author: "德尔斐神殿箴言",
+                category: "wisdom"
+            },
+            {
+                text: "人生是一场艰苦的长跑，只有坚持到最后才算成功。",
+                author: "佚名",
+                category: "success"
+            }
+        ];
+
+        // 当前类别
+        let currentCategory = "all";
+
+        // 创建名言卡片
+        function createQuoteCard(quote) {
+            const card = document.createElement('div');
+            card.className = 'quote-card';
+            
+            const quoteText = document.createElement('div');
+            quoteText.className = 'quote';
+            quoteText.textContent = quote.text;
+            
+            const author = document.createElement('div');
+            author.className = 'author';
+            author.textContent = `— ${quote.author}`;
+            
+            card.appendChild(quoteText);
+            card.appendChild(author);
+            
+            return card;
+        }
+
+        // 显示名言
+        function displayQuotes() {
+            const container = document.getElementById('quotes-container');
+            container.innerHTML = ''; // 清空容器
+            
+            let filteredQuotes = quotes;
+            
+            // 筛选指定类别的名言
+            if (currentCategory !== "all") {
+                filteredQuotes = quotes.filter(quote => quote.category === currentCategory);
+            }
+            
+            // 创建并添加名言卡片
+            filteredQuotes.forEach(quote => {
+                const card = createQuoteCard(quote);
+                container.appendChild(card);
+            });
+        }
+
+        // 类别按钮事件
+        document.querySelectorAll(".category-btn").forEach(button => {
+            button.addEventListener("click", function() {
+                // 移除所有按钮的 active 类
+                document.querySelectorAll(".category-btn").forEach(btn => {
+                    btn.classList.remove("active");
+                });
+                
+                // 添加当前按钮的 active 类
+                this.classList.add("active");
+                
+                // 更新当前类别
+                currentCategory = this.getAttribute("data-category");
+                
+                // 显示名言
+                displayQuotes();
+            });
+        });
+
+        // 初始化显示所有名言
+        displayQuotes();
+    </script>
+</body>
+</html> 

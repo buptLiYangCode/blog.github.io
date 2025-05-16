@@ -85,7 +85,7 @@ h1 {
 }
 
 .quote::before, .quote::after {
-    content: """;
+    content: "2";
     font-size: 3rem;
     color: var(--primary-color);
     position: absolute;
@@ -98,7 +98,7 @@ h1 {
 }
 
 .quote::after {
-    content: """;
+    content: "3";
     bottom: -40px;
     right: 0;
 }

@@ -474,4 +474,49 @@ footer {
     min-height: 150px;
     line-height: 1.8;
     font-size: 1.2rem;
+}
+
+/* 日程显示样式修改 */
+.past-schedules-container {
+    position: absolute;
+    top: -9999px; /* 隐藏在视图之外 */
+    left: 0;
+    width: 100%;
+    opacity: 0.6;
+}
+
+/* 滚动后才显示过去的日程 */
+.widget-content:focus-within .past-schedules-container,
+.widget-content:hover .past-schedules-container {
+    position: static;
+    margin-bottom: 15px;
+}
+
+/* 第一条即将到来的日程样式 */
+.first-upcoming {
+    position: relative;
+    border-left: 3px solid rgba(76, 175, 80, 0.8);
+    background: rgba(76, 175, 80, 0.15) !important;
+}
+
+/* 箭头标记样式 */
+.arrow-mark {
+    position: absolute;
+    left: -15px;
+    top: 50%;
+    transform: translateY(-50%);
+    color: rgba(76, 175, 80, 0.9);
+    font-weight: bold;
+    font-size: 1.2rem;
+}
+
+/* 确保schedule-widget内容容器有相对定位，以便正确放置历史日程 */
+.schedule-widget .widget-content {
+    position: relative;
+    overflow: hidden;
+}
+
+.scrollable-list {
+    position: relative;
+    padding-left: 15px; /* 为箭头留出空间 */
 } 

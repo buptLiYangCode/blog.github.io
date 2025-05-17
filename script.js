@@ -12,15 +12,88 @@ const FILE_NAMES = {
     MESSAGE: 'messages.txt'
 };
 
+// 背景轮播计时器
+let backgroundInterval;
+
 // 初始化
 function init() {
     updateDateTime();
+    setupBackgroundRotation();
     loadMessageFromFile();
     loadBirthdaysFromFile();
     loadSchedulesFromFile();
     
     // 设置定时器每秒更新时间
     setInterval(updateDateTime, 1000);
+}
+
+// 设置背景图片轮播
+function setupBackgroundRotation() {
+    // 获取images文件夹中的图片
+    fetchImagesList()
+        .then(images => {
+            if (images && images.length > 0) {
+                startImageRotation(images);
+            } else {
+                // 使用默认背景
+                document.body.style.backgroundImage = 'linear-gradient(135deg, #3498db, #8e44ad)';
+            }
+        })
+        .catch(error => {
+            console.error('背景图片加载失败:', error);
+            // 使用默认背景
+            document.body.style.backgroundImage = 'linear-gradient(135deg, #3498db, #8e44ad)';
+        });
+}
+
+// 获取images文件夹中的所有图片
+function fetchImagesList() {
+    return new Promise((resolve) => {
+        // 尝试读取常见图片格式
+        const imageExtensions = ['jpg', 'jpeg', 'png', 'gif', 'webp'];
+        const imagePaths = [];
+        
+        // 提取images文件夹内的图片
+        for (let i = 1; i <= 10; i++) { // 假设最多有10张图片，可以根据需要调整
+            for (const ext of imageExtensions) {
+                imagePaths.push(`images/bg${i}.${ext}`);
+            }
+        }
+        
+        // 验证图片是否存在
+        Promise.all(
+            imagePaths.map(path => 
+                fetch(path, { method: 'HEAD' })
+                    .then(response => response.ok ? path : null)
+                    .catch(() => null)
+            )
+        )
+        .then(results => {
+            const validImages = results.filter(path => path !== null);
+            resolve(validImages);
+        });
+    });
+}
+
+// 开始图片轮播
+function startImageRotation(images) {
+    if (images.length === 0) return;
+    
+    // 随机选择起始图片
+    let currentIndex = Math.floor(Math.random() * images.length);
+    document.body.style.backgroundImage = `url('${images[currentIndex]}')`;
+    
+    // 清除之前的定时器
+    if (backgroundInterval) {
+        clearInterval(backgroundInterval);
+    }
+    
+    // 设置10秒自动轮播
+    backgroundInterval = setInterval(() => {
+        currentIndex = (currentIndex + 1) % images.length;
+        document.body.style.transition = 'background-image 1s ease-in-out';
+        document.body.style.backgroundImage = `url('${images[currentIndex]}')`;
+    }, 10000);
 }
 
 // 更新日期和时间
@@ -215,14 +288,14 @@ function displaySchedules(schedules) {
     // 按日期排序日程
     const sortedSchedules = sortSchedulesByDate(schedules);
     
-    // 寻找今天的日程索引
+    // 获取今天的日期
     const today = new Date();
     today.setHours(0, 0, 0, 0);
-    let todayIndex = -1;
+    
+    // 划分历史和未来日程
     const upcomingSchedules = [];
     const pastSchedules = [];
     
-    // 划分历史和未来日程
     sortedSchedules.forEach((schedule) => {
         const scheduleDate = new Date(schedule.date);
         scheduleDate.setHours(0, 0, 0, 0);
@@ -234,65 +307,61 @@ function displaySchedules(schedules) {
         }
     });
     
-    // 添加即将到来的日程部分
-    if (upcomingSchedules.length > 0) {
-        const upcomingTitle = document.createElement('div');
-        upcomingTitle.className = 'section-title upcoming';
-        upcomingTitle.textContent = '即将到来';
-        upcomingTitle.id = 'upcoming-section';
-        scheduleListEl.appendChild(upcomingTitle);
-        
-        upcomingSchedules.forEach(schedule => {
-            appendScheduleItem(schedule);
-        });
-    }
-    
-    // 添加历史日程部分
+    // 创建隐藏的历史日程容器
     if (pastSchedules.length > 0) {
-        const pastTitle = document.createElement('div');
-        pastTitle.className = 'section-title past';
-        pastTitle.textContent = '历史日程';
-        scheduleListEl.appendChild(pastTitle);
+        const pastContainer = document.createElement('div');
+        pastContainer.className = 'past-schedules-container';
         
         pastSchedules.forEach(schedule => {
-            appendScheduleItem(schedule);
+            appendScheduleItem(schedule, pastContainer, false);
         });
+        
+        scheduleListEl.appendChild(pastContainer);
     }
     
-    // 滚动到即将到来的日程部分
+    // 添加即将到来的日程
     if (upcomingSchedules.length > 0) {
-        const upcomingSection = document.getElementById('upcoming-section');
-        if (upcomingSection) {
+        upcomingSchedules.forEach((schedule, index) => {
+            // 第一条即将到来的日程添加箭头标记
+            const isFirst = index === 0;
+            appendScheduleItem(schedule, scheduleListEl, isFirst);
+        });
+        
+        // 确保第一条即将到来的日程可见
+        if (scheduleListEl.firstChild) {
             setTimeout(() => {
-                upcomingSection.scrollIntoView({ behavior: 'auto', block: 'start' });
+                scheduleListEl.scrollTop = 0;
             }, 100);
         }
     }
     
-    function appendScheduleItem(schedule) {
+    function appendScheduleItem(schedule, container, isFirstUpcoming) {
         const scheduleDate = new Date(schedule.date);
-        const isUpcoming = scheduleDate >= today;
-        const isPast = scheduleDate < today;
-        const isSameDay = scheduleDate.toDateString() === today.toDateString();
+        const isToday = scheduleDate.toDateString() === today.toDateString();
         
         const scheduleItem = document.createElement('div');
         
         // 添加不同的样式
         let itemClass = 'schedule-item';
         if (schedule.completed) itemClass += ' completed';
-        if (isPast && !schedule.completed) itemClass += ' past';
-        if (isUpcoming && isSameDay) itemClass += ' today';
+        if (scheduleDate < today && !schedule.completed) itemClass += ' past';
+        if (isToday) itemClass += ' today';
+        if (isFirstUpcoming) itemClass += ' first-upcoming';
         
         scheduleItem.className = itemClass;
         
+        // 添加箭头标记给第一条即将到来的日程
+        const arrowMark = isFirstUpcoming ? '<span class="arrow-mark">&gt;</span>' : '';
+        
         scheduleItem.innerHTML = `
             <div>
+                ${arrowMark}
                 <div class="schedule-text">${schedule.text}</div>
                 <div class="schedule-date">${formatScheduleDate(schedule.date)}</div>
             </div>
         `;
         
-        scheduleListEl.appendChild(scheduleItem);
+        container.appendChild(scheduleItem);
     }
 }
 

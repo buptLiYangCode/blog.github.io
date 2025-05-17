@@ -25,7 +25,6 @@
                     <p class="no-data">暂无近期生日</p>
                     <!-- 生日信息将通过JavaScript动态插入 -->
                 </div>
-                <button class="btn-add" id="add-birthday-btn">添加生日</button>
             </section>
             
             <!-- 中间：每日寄语区域 -->
@@ -34,53 +33,31 @@
                 <div class="widget-content">
                     <div id="daily-message">
                         <p>今天我想对自己说：</p>
-                        <div id="message-content" contenteditable="true">每一天都是新的开始，给自己一个微笑！</div>
-                        <button class="btn-save" id="save-message-btn">保存</button>
+                        <div id="message-content" class="message-text"></div>
                     </div>
                 </div>
             </section>
             
             <!-- 右侧：日程安排区域 -->
             <section class="widget schedule-widget">
-                <h2>今日日程</h2>
-                <div class="widget-content" id="schedule-list">
-                    <!-- 日程将通过JavaScript动态插入 -->
-                </div>
-                <div class="add-schedule">
-                    <input type="text" id="new-schedule" placeholder="输入新日程...">
-                    <button class="btn-add" id="add-schedule-btn">添加</button>
+                <h2>日程安排</h2>
+                <div class="widget-content">
+                    <div id="schedule-list" class="scrollable-list">
+                        <!-- 日程将通过JavaScript动态插入 -->
+                    </div>
                 </div>
             </section>
         </main>
         
         <!-- 底部区域 -->
         <footer>
-            <div class="wallpaper-controls">
-                <label for="wallpaper-upload" class="upload-btn">上传新壁纸</label>
-                <input type="file" id="wallpaper-upload" accept="image/*" style="display: none;">
+            <div class="file-info">
+                <p>数据从以下文件读取: birthdays.txt、schedules.txt 和 messages.txt</p>
             </div>
         </footer>
     </div>
     
-    <!-- 模态框：添加生日 -->
-    <div class="modal" id="birthday-modal">
-        <div class="modal-content">
-            <span class="close-btn">&times;</span>
-            <h2>添加生日</h2>
-            <form id="birthday-form">
-                <div class="form-group">
-                    <label for="person-name">姓名</label>
-                    <input type="text" id="person-name" required>
-                </div>
-                <div class="form-group">
-                    <label for="birth-date">生日日期</label>
-                    <input type="date" id="birth-date" required>
-                </div>
-                <button type="submit" class="btn-submit">保存</button>
-            </form>
-        </div>
-    </div>
-    
+    <script src="lunar-calendar.js"></script>
     <script src="script.js"></script>
 </body>
 </html> 

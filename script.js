@@ -4,36 +4,23 @@ const currentTimeEl = document.getElementById('current-time');
 const birthdayListEl = document.getElementById('birthday-list');
 const scheduleListEl = document.getElementById('schedule-list');
 const messageContentEl = document.getElementById('message-content');
-const saveMessageBtn = document.getElementById('save-message-btn');
-const addBirthdayBtn = document.getElementById('add-birthday-btn');
-const addScheduleBtn = document.getElementById('add-schedule-btn');
-const newScheduleInput = document.getElementById('new-schedule');
-const birthdayModal = document.getElementById('birthday-modal');
-const birthdayForm = document.getElementById('birthday-form');
-const closeModalBtn = document.querySelector('.close-btn');
-const wallpaperUpload = document.getElementById('wallpaper-upload');
 
-// 存储键名
-const STORAGE_KEYS = {
-    BIRTHDAYS: 'personal_dashboard_birthdays',
-    SCHEDULES: 'personal_dashboard_schedules',
-    MESSAGE: 'personal_dashboard_message',
-    WALLPAPER: 'personal_dashboard_wallpaper'
+// 文件名
+const FILE_NAMES = {
+    BIRTHDAYS: 'birthdays.txt',
+    SCHEDULES: 'schedules.txt',
+    MESSAGE: 'messages.txt'
 };
 
 // 初始化
 function init() {
     updateDateTime();
-    loadWallpaper();
-    loadMessage();
-    loadBirthdays();
-    loadSchedules();
+    loadMessageFromFile();
+    loadBirthdaysFromFile();
+    loadSchedulesFromFile();
     
     // 设置定时器每秒更新时间
     setInterval(updateDateTime, 1000);
-    
-    // 绑定事件
-    addEventListeners();
 }
 
 // 更新日期和时间
@@ -48,27 +35,138 @@ function updateDateTime() {
     currentTimeEl.textContent = now.toLocaleTimeString('zh-CN', { hour12: false });
 }
 
-// 加载背景壁纸
-function loadWallpaper() {
-    const savedWallpaper = localStorage.getItem(STORAGE_KEYS.WALLPAPER);
-    if (savedWallpaper) {
-        document.body.style.backgroundImage = `url(${savedWallpaper})`;
-    }
+// 从文件加载数据
+function loadDataFromFile(fileName) {
+    return fetch(fileName)
+        .then(response => {
+            if (!response.ok) {
+                throw new Error('文件不存在');
+            }
+            return response.text();
+        })
+        .catch(error => {
+            console.log(`无法加载文件 ${fileName}: ${error.message}`);
+            return '';
+        });
 }
 
-// 加载每日寄语
-function loadMessage() {
-    const savedMessage = localStorage.getItem(STORAGE_KEYS.MESSAGE);
-    if (savedMessage) {
-        messageContentEl.textContent = savedMessage;
-    }
+// 加载每日寄语从文件
+function loadMessageFromFile() {
+    loadDataFromFile(FILE_NAMES.MESSAGE)
+        .then(data => {
+            if (data) {
+                messageContentEl.textContent = data.trim();
+            } else {
+                messageContentEl.textContent = "每一天都是新的开始，给自己一个微笑！";
+            }
+        });
 }
 
-// 加载生日数据
-function loadBirthdays() {
-    const savedBirthdays = JSON.parse(localStorage.getItem(STORAGE_KEYS.BIRTHDAYS) || '[]');
+// 加载生日数据从文件
+function loadBirthdaysFromFile() {
+    loadDataFromFile(FILE_NAMES.BIRTHDAYS)
+        .then(data => {
+            if (data) {
+                const birthdays = parseBirthdayFile(data);
+                displayBirthdays(birthdays);
+            } else {
+                birthdayListEl.innerHTML = '<p class="no-data">暂无生日数据</p>';
+            }
+        });
+}
+
+// 加载日程安排从文件
+function loadSchedulesFromFile() {
+    loadDataFromFile(FILE_NAMES.SCHEDULES)
+        .then(data => {
+            if (data) {
+                const schedules = parseScheduleFile(data);
+                displaySchedules(schedules);
+            } else {
+                scheduleListEl.innerHTML = '<p class="no-data">暂无日程安排</p>';
+            }
+        });
+}
+
+// 解析生日文件内容
+function parseBirthdayFile(content) {
+    const lines = content.trim().split('\n');
+    const birthdays = [];
     
-    if (savedBirthdays.length === 0) {
+    lines.forEach(line => {
+        if (line.trim()) {
+            const name = line.split(' ')[0];
+            const type = line.split(' ')[1]; // "农历" 或 "阳历"
+            const dateStr = line.split(' ')[2];
+            
+            let date = null;
+            
+            if (type === "农历") {
+                // 农历日期，转换为今年对应的阳历日期
+                date = LunarCalendar.calculateLunarBirthday(line);
+            } else {
+                // 阳历日期，直接解析
+                date = LunarCalendar.parseSolarBirthday(line);
+            }
+            
+            if (date) {
+                birthdays.push({
+                    id: Date.now().toString() + Math.random().toString(36).substr(2, 5),
+                    name: name,
+                    date: date.toISOString().split('T')[0],
+                    lunarType: type === "农历",
+                    originalStr: line
+                });
+            }
+        }
+    });
+    
+    return birthdays;
+}
+
+// 解析日程文件内容
+function parseScheduleFile(content) {
+    const lines = content.trim().split('\n');
+    const schedules = [];
+    
+    lines.forEach(line => {
+        // 预期格式: 2023-05-17 10:00 事件内容 [完成状态]
+        const parts = line.split(' ');
+        if (parts.length >= 3) {
+            let dateStr = parts[0];
+            let timeStr = parts[1];
+            // 检查第二部分是否为时间格式
+            if (timeStr.includes(':')) {
+                // 有时间部分
+                const date = dateStr + 'T' + timeStr;
+                
+                // 检查最后一项是否为完成状态标记
+                let isCompleted = false;
+                let text = '';
+                
+                if (parts[parts.length - 1] === '[已完成]') {
+                    isCompleted = true;
+                    text = parts.slice(2, parts.length - 1).join(' ');
+                } else {
+                    text = parts.slice(2).join(' ');
+                }
+                
+                schedules.push({
+                    id: Date.now().toString() + Math.random().toString(36).substr(2, 5),
+                    date: date,
+                    text: text,
+                    completed: isCompleted
+                });
+            }
+        }
+    });
+    
+    return schedules;
+}
+
+// 显示生日列表
+function displayBirthdays(birthdays) {
+    if (birthdays.length === 0) {
         birthdayListEl.innerHTML = '<p class="no-data">暂无近期生日</p>';
         return;
     }
@@ -77,7 +175,7 @@ function loadBirthdays() {
     birthdayListEl.innerHTML = '';
     
     // 对生日按照日期远近排序
-    const sortedBirthdays = sortBirthdaysByUpcoming(savedBirthdays);
+    const sortedBirthdays = sortBirthdaysByUpcoming(birthdays);
     
     // 显示生日列表
     sortedBirthdays.forEach(birthday => {
@@ -90,306 +188,188 @@ function loadBirthdays() {
             birthdayItem.style.background = 'rgba(255, 188, 73, 0.3)';
         }
         
+        let typeLabel = birthday.lunarType ? '<span class="lunar-label">农历</span>' : '';
+        
         birthdayItem.innerHTML = `
             <div>
-                <div class="birthday-name">${birthday.name}</div>
+                <div class="birthday-name">${birthday.name} ${typeLabel}</div>
                 <div class="birthday-date">${formatBirthdayDate(birthday.date)}</div>
             </div>
             <div class="birthday-days">${daysUntil === 0 ? '今天' : `${daysUntil}天后`}</div>
-            <button class="control-btn delete-btn" data-id="${birthday.id}">×</button>
         `;
         
         birthdayListEl.appendChild(birthdayItem);
     });
-    
-    // 绑定删除按钮事件
-    document.querySelectorAll('.delete-btn').forEach(btn => {
-        btn.addEventListener('click', function() {
-            const id = this.getAttribute('data-id');
-            deleteBirthday(id);
-        });
-    });
 }
 
-// 加载日程安排
-function loadSchedules() {
-    const savedSchedules = JSON.parse(localStorage.getItem(STORAGE_KEYS.SCHEDULES) || '[]');
-    
+// 显示日程列表
+function displaySchedules(schedules) {
     // 清空列表
     scheduleListEl.innerHTML = '';
     
-    if (savedSchedules.length === 0) {
-        scheduleListEl.innerHTML = '<p class="no-data">今日暂无日程安排</p>';
+    if (schedules.length === 0) {
+        scheduleListEl.innerHTML = '<p class="no-data">暂无日程安排</p>';
         return;
     }
     
-    // 显示日程列表
-    savedSchedules.forEach(schedule => {
+    // 按日期排序日程
+    const sortedSchedules = sortSchedulesByDate(schedules);
+    
+    // 寻找今天的日程索引
+    const today = new Date();
+    today.setHours(0, 0, 0, 0);
+    let todayIndex = -1;
+    const upcomingSchedules = [];
+    const pastSchedules = [];
+    
+    // 划分历史和未来日程
+    sortedSchedules.forEach((schedule) => {
+        const scheduleDate = new Date(schedule.date);
+        scheduleDate.setHours(0, 0, 0, 0);
+        
+        if (scheduleDate >= today) {
+            upcomingSchedules.push(schedule);
+        } else {
+            pastSchedules.push(schedule);
+        }
+    });
+    
+    // 添加即将到来的日程部分
+    if (upcomingSchedules.length > 0) {
+        const upcomingTitle = document.createElement('div');
+        upcomingTitle.className = 'section-title upcoming';
+        upcomingTitle.textContent = '即将到来';
+        upcomingTitle.id = 'upcoming-section';
+        scheduleListEl.appendChild(upcomingTitle);
+        
+        upcomingSchedules.forEach(schedule => {
+            appendScheduleItem(schedule);
+        });
+    }
+    
+    // 添加历史日程部分
+    if (pastSchedules.length > 0) {
+        const pastTitle = document.createElement('div');
+        pastTitle.className = 'section-title past';
+        pastTitle.textContent = '历史日程';
+        scheduleListEl.appendChild(pastTitle);
+        
+        pastSchedules.forEach(schedule => {
+            appendScheduleItem(schedule);
+        });
+    }
+    
+    // 滚动到即将到来的日程部分
+    if (upcomingSchedules.length > 0) {
+        const upcomingSection = document.getElementById('upcoming-section');
+        if (upcomingSection) {
+            setTimeout(() => {
+                upcomingSection.scrollIntoView({ behavior: 'auto', block: 'start' });
+            }, 100);
+        }
+    }
+    
+    function appendScheduleItem(schedule) {
+        const scheduleDate = new Date(schedule.date);
+        const isUpcoming = scheduleDate >= today;
+        const isPast = scheduleDate < today;
+        const isSameDay = scheduleDate.toDateString() === today.toDateString();
+        
         const scheduleItem = document.createElement('div');
-        scheduleItem.className = `schedule-item ${schedule.completed ? 'completed' : ''}`;
+        
+        // 添加不同的样式
+        let itemClass = 'schedule-item';
+        if (schedule.completed) itemClass += ' completed';
+        if (isPast && !schedule.completed) itemClass += ' past';
+        if (isUpcoming && isSameDay) itemClass += ' today';
+        
+        scheduleItem.className = itemClass;
+        
         scheduleItem.innerHTML = `
-            <div class="schedule-text">${schedule.text}</div>
             <div>
-                <button class="control-btn toggle-btn" data-id="${schedule.id}">${schedule.completed ? '↩' : '✓'}</button>
-                <button class="control-btn delete-schedule-btn" data-id="${schedule.id}">×</button>
+                <div class="schedule-text">${schedule.text}</div>
+                <div class="schedule-date">${formatScheduleDate(schedule.date)}</div>
             </div>
         `;
         
         scheduleListEl.appendChild(scheduleItem);
+    }
+}
+
+// 按日期排序日程
+function sortSchedulesByDate(schedules) {
+    return [...schedules].sort((a, b) => {
+        return new Date(a.date) - new Date(b.date);
     });
-    
-    // 绑定按钮事件
-    document.querySelectorAll('.toggle-btn').forEach(btn => {
-        btn.addEventListener('click', function() {
-            const id = this.getAttribute('data-id');
-            toggleScheduleStatus(id);
-        });
-    });
-    
-    document.querySelectorAll('.delete-schedule-btn').forEach(btn => {
-        btn.addEventListener('click', function() {
-            const id = this.getAttribute('data-id');
-            deleteSchedule(id);
-        });
-    });
-}
-
-// 保存每日寄语
-function saveMessage() {
-    const message = messageContentEl.textContent.trim();
-    localStorage.setItem(STORAGE_KEYS.MESSAGE, message);
-    showNotification('寄语已保存');
-}
-
-// 添加生日
-function addBirthday(name, date) {
-    const birthdays = JSON.parse(localStorage.getItem(STORAGE_KEYS.BIRTHDAYS) || '[]');
-    
-    // 创建新生日条目
-    const newBirthday = {
-        id: Date.now().toString(),
-        name: name,
-        date: date
-    };
-    
-    birthdays.push(newBirthday);
-    localStorage.setItem(STORAGE_KEYS.BIRTHDAYS, JSON.stringify(birthdays));
-    
-    // 重新加载生日列表
-    loadBirthdays();
-    showNotification('生日已添加');
-}
-
-// 删除生日
-function deleteBirthday(id) {
-    const birthdays = JSON.parse(localStorage.getItem(STORAGE_KEYS.BIRTHDAYS) || '[]');
-    const filteredBirthdays = birthdays.filter(birthday => birthday.id !== id);
-    
-    localStorage.setItem(STORAGE_KEYS.BIRTHDAYS, JSON.stringify(filteredBirthdays));
-    
-    // 重新加载生日列表
-    loadBirthdays();
-    showNotification('生日已删除');
-}
-
-// 添加日程
-function addSchedule(text) {
-    if (!text.trim()) return;
-    
-    const schedules = JSON.parse(localStorage.getItem(STORAGE_KEYS.SCHEDULES) || '[]');
-    
-    // 创建新日程
-    const newSchedule = {
-        id: Date.now().toString(),
-        text: text.trim(),
-        completed: false
-    };
-    
-    schedules.push(newSchedule);
-    localStorage.setItem(STORAGE_KEYS.SCHEDULES, JSON.stringify(schedules));
-    
-    // 重新加载日程列表
-    loadSchedules();
-    
-    // 清空输入框
-    newScheduleInput.value = '';
-    showNotification('日程已添加');
-}
-
-// 删除日程
-function deleteSchedule(id) {
-    const schedules = JSON.parse(localStorage.getItem(STORAGE_KEYS.SCHEDULES) || '[]');
-    const filteredSchedules = schedules.filter(schedule => schedule.id !== id);
-    
-    localStorage.setItem(STORAGE_KEYS.SCHEDULES, JSON.stringify(filteredSchedules));
-    
-    // 重新加载日程列表
-    loadSchedules();
-    showNotification('日程已删除');
-}
-
-// 切换日程状态
-function toggleScheduleStatus(id) {
-    const schedules = JSON.parse(localStorage.getItem(STORAGE_KEYS.SCHEDULES) || '[]');
-    
-    // 查找并更改状态
-    const updatedSchedules = schedules.map(schedule => {
-        if (schedule.id === id) {
-            return { ...schedule, completed: !schedule.completed };
-        }
-        return schedule;
-    });
-    
-    localStorage.setItem(STORAGE_KEYS.SCHEDULES, JSON.stringify(updatedSchedules));
-    
-    // 重新加载日程列表
-    loadSchedules();
-}
-
-// 上传壁纸
-function handleWallpaperUpload(event) {
-    const file = event.target.files[0];
-    if (!file) return;
-    
-    const reader = new FileReader();
-    
-    reader.onload = function(e) {
-        const dataUrl = e.target.result;
-        
-        // 保存壁纸到本地存储
-        localStorage.setItem(STORAGE_KEYS.WALLPAPER, dataUrl);
-        
-        // 设置背景
-        document.body.style.backgroundImage = `url(${dataUrl})`;
-        
-        showNotification('壁纸已更新');
-    };
-    
-    reader.readAsDataURL(file);
 }
 
 // 计算距离生日还有多少天
 function getDaysUntilBirthday(birthdateStr) {
     const today = new Date();
+    today.setHours(0, 0, 0, 0);
+    
+    // 解析生日日期
     const birthdate = new Date(birthdateStr);
     
-    // 设置生日为今年
-    const thisYearBirthday = new Date(
-        today.getFullYear(),
-        birthdate.getMonth(),
-        birthdate.getDate()
-    );
+    // 创建今年的生日日期
+    const birthdayThisYear = new Date(today.getFullYear(), birthdate.getMonth(), birthdate.getDate());
     
     // 如果今年的生日已经过了，计算到明年生日的天数
-    if (thisYearBirthday < today) {
-        thisYearBirthday.setFullYear(today.getFullYear() + 1);
+    if (birthdayThisYear < today) {
+        birthdayThisYear.setFullYear(today.getFullYear() + 1);
     }
     
-    // 计算天数差
-    const diffTime = thisYearBirthday.getTime() - today.getTime();
+    // 计算天数差异
+    const diffTime = birthdayThisYear - today;
     const diffDays = Math.ceil(diffTime / (1000 * 60 * 60 * 24));
     
     return diffDays;
 }
 
-// 格式化生日日期为 "MM月DD日" 格式
+// 格式化生日日期
 function formatBirthdayDate(dateStr) {
     const date = new Date(dateStr);
     return `${date.getMonth() + 1}月${date.getDate()}日`;
 }
 
-// 显示通知
-function showNotification(message) {
-    const notification = document.createElement('div');
-    notification.className = 'notification';
-    notification.textContent = message;
+// 日程日期格式化
+function formatScheduleDate(dateStr) {
+    const date = new Date(dateStr);
+    const today = new Date();
+    today.setHours(0, 0, 0, 0);
     
-    // 样式
-    notification.style.position = 'fixed';
-    notification.style.bottom = '20px';
-    notification.style.right = '20px';
-    notification.style.background = 'rgba(0, 0, 0, 0.7)';
-    notification.style.color = 'white';
-    notification.style.padding = '10px 20px';
-    notification.style.borderRadius = '5px';
-    notification.style.zIndex = '1000';
-    notification.style.transition = 'opacity 0.3s';
+    const tomorrow = new Date(today);
+    tomorrow.setDate(tomorrow.getDate() + 1);
     
-    document.body.appendChild(notification);
+    // 格式化时间
+    const timeStr = date.toTimeString().substring(0, 5);
     
-    // 3秒后移除
-    setTimeout(() => {
-        notification.style.opacity = '0';
-        setTimeout(() => {
-            document.body.removeChild(notification);
-        }, 300);
-    }, 3000);
+    if (isSameDay(date, today)) {
+        return `今天 ${timeStr}`;
+    } else if (isSameDay(date, tomorrow)) {
+        return `明天 ${timeStr}`;
+    } else {
+        return `${date.toLocaleDateString('zh-CN', { month: 'long', day: 'numeric', weekday: 'short' })} ${timeStr}`;
+    }
 }
 
-// 按照即将到来的生日排序
+// 判断两个日期是否是同一天
+function isSameDay(date1, date2) {
+    return date1.getFullYear() === date2.getFullYear() &&
+           date1.getMonth() === date2.getMonth() &&
+           date1.getDate() === date2.getDate();
+}
+
+// 按即将到来的日期排序生日
 function sortBirthdaysByUpcoming(birthdays) {
-    return [...birthdays].sort((a, b) => {
-        const daysA = getDaysUntilBirthday(a.date);
-        const daysB = getDaysUntilBirthday(b.date);
-        return daysA - daysB;
+    // 复制数组以避免修改原数组
+    const birthdayCopy = [...birthdays];
+    
+    // 按照还有多少天过生日排序
+    return birthdayCopy.sort((a, b) => {
+        return getDaysUntilBirthday(a.date) - getDaysUntilBirthday(b.date);
     });
 }
 
-// 打开生日模态框
-function openBirthdayModal() {
-    birthdayModal.classList.add('show');
-}
-
-// 关闭生日模态框
-function closeBirthdayModal() {
-    birthdayModal.classList.remove('show');
-}
-
-// 绑定事件监听
-function addEventListeners() {
-    // 保存寄语
-    saveMessageBtn.addEventListener('click', saveMessage);
-    
-    // 日程添加
-    addScheduleBtn.addEventListener('click', () => {
-        addSchedule(newScheduleInput.value);
-    });
-    
-    // 按回车添加日程
-    newScheduleInput.addEventListener('keypress', (e) => {
-        if (e.key === 'Enter') {
-            addSchedule(newScheduleInput.value);
-        }
-    });
-    
-    // 生日模态框
-    addBirthdayBtn.addEventListener('click', openBirthdayModal);
-    closeModalBtn.addEventListener('click', closeBirthdayModal);
-    
-    // 点击模态框外部关闭
-    birthdayModal.addEventListener('click', (e) => {
-        if (e.target === birthdayModal) {
-            closeBirthdayModal();
-        }
-    });
-    
-    // 提交生日表单
-    birthdayForm.addEventListener('submit', (e) => {
-        e.preventDefault();
-        
-        const name = document.getElementById('person-name').value.trim();
-        const date = document.getElementById('birth-date').value;
-        
-        if (name && date) {
-            addBirthday(name, date);
-            birthdayForm.reset();
-            closeBirthdayModal();
-        }
-    });
-    
-    // 壁纸上传
-    wallpaperUpload.addEventListener('change', handleWallpaperUpload);
-}
-
-// 应用启动
+// 页面加载时初始化
 document.addEventListener('DOMContentLoaded', init); 

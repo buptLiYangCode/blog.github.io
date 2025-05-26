@@ -1,444 +1,197 @@
-// DOM元素
-const currentDateEl = document.getElementById('current-date');
-const currentTimeEl = document.getElementById('current-time');
-const birthdayListEl = document.getElementById('birthday-list');
-const scheduleListEl = document.getElementById('schedule-list');
-const messageContentEl = document.getElementById('message-content');
+// 假设 lunar-calendar.js 已经引入并在全局可用，或者您使用模块方式引入
+// 例如: import { calendar } from './lunar-calendar.js'; // (需要调整lunar-calendar.js以支持ES6模块)
 
-// 文件名
-const FILE_NAMES = {
-    BIRTHDAYS: 'birthdays.txt',
-    SCHEDULES: 'schedules.txt',
-    MESSAGE: 'messages.txt'
-};
+document.addEventListener('DOMContentLoaded', () => {
+    // --- 数据定义 ---
+    const wallpapers = [
+        "https://img.picui.cn/free/2025/05/26/68346a0cae79a.jpg", // 示例图床 API，您可以替换成您的图床链接
+    ];
 
-// 背景轮播计时器
-let backgroundInterval;
+    const birthdays = [
+        { name: "妈妈", type: "lunar", date: "12.28" }, // 农历12月28日
+        { name: "弟弟", type: "lunar", date: "10.01" }, // 阳历10月01日
+        // 添加更多生日
+    ];
 
-// 初始化
-function init() {
-    updateDateTime();
-    setupBackgroundRotation();
-    loadMessageFromFile();
-    loadBirthdaysFromFile();
-    loadSchedulesFromFile();
-    
-    // 设置定时器每秒更新时间
-    setInterval(updateDateTime, 1000);
-}
+    const messages = [
+        { text: "困难是上天包装过的奖励。", date: "2025.5.26" },
+        { text: "世上没有绝望的处境，只有对处境绝望的人。", date: "2025.5.26" },
+        { text: "早睡早起，好的习惯能帮你度过难关。", date: "2025.5.26" },
+        // 添加更多话语
+    ];
 
-// 设置背景图片轮播
-function setupBackgroundRotation() {
-    // 获取images文件夹中的图片
-    fetchImagesList()
-        .then(images => {
-            if (images && images.length > 0) {
-                startImageRotation(images);
-            } else {
-                // 使用默认背景
-                document.body.style.backgroundImage = 'linear-gradient(135deg, #3498db, #8e44ad)';
-            }
-        })
-        .catch(error => {
-            console.error('背景图片加载失败:', error);
-            // 使用默认背景
-            document.body.style.backgroundImage = 'linear-gradient(135deg, #3498db, #8e44ad)';
-        });
-}
+    const schedule = [
+        { event: "毕设答辩", datetime: "2025.5.29#13:30" },
+        // 添加更多日程
+    ];
 
-// 获取images文件夹中的所有图片
-function fetchImagesList() {
-    return new Promise((resolve) => {
-        // 尝试读取常见图片格式
-        const imageExtensions = ['jpg', 'jpeg', 'png', 'gif', 'webp'];
-        const imagePaths = [];
-        
-        // 提取images文件夹内的图片
-        for (let i = 1; i <= 10; i++) { // 假设最多有10张图片，可以根据需要调整
-            for (const ext of imageExtensions) {
-                imagePaths.push(`images/bg${i}.${ext}`);
-            }
-        }
-        
-        // 验证图片是否存在
-        Promise.all(
-            imagePaths.map(path => 
-                fetch(path, { method: 'HEAD' })
-                    .then(response => response.ok ? path : null)
-                    .catch(() => null)
-            )
-        )
-        .then(results => {
-            const validImages = results.filter(path => path !== null);
-            resolve(validImages);
-        });
-    });
-}
+    // --- DOM元素获取 ---
+    const dateDisplay = document.getElementById('date-display');
+    const timeDisplay = document.getElementById('time-display');
+    const birthdaysList = document.getElementById('birthdays-list');
+    const messagesList = document.getElementById('messages-list');
+    const scheduleList = document.getElementById('schedule-list');
+    const bodyElement = document.body;
 
-// 开始图片轮播
-function startImageRotation(images) {
-    if (images.length === 0) return;
-    
-    // 随机选择起始图片
-    let currentIndex = Math.floor(Math.random() * images.length);
-    document.body.style.backgroundImage = `url('${images[currentIndex]}')`;
-    
-    // 清除之前的定时器
-    if (backgroundInterval) {
-        clearInterval(backgroundInterval);
-    }
-    
-    // 设置10秒自动轮播
-    backgroundInterval = setInterval(() => {
-        currentIndex = (currentIndex + 1) % images.length;
-        document.body.style.transition = 'background-image 1s ease-in-out';
-        document.body.style.backgroundImage = `url('${images[currentIndex]}')`;
-    }, 10000);
-}
+    // --- 功能函数 ---
 
-// 更新日期和时间
-function updateDateTime() {
-    const now = new Date();
-    
-    // 格式化日期：2023年10月21日 星期六
-    const dateOptions = { year: 'numeric', month: 'long', day: 'numeric', weekday: 'long' };
-    currentDateEl.textContent = now.toLocaleDateString('zh-CN', dateOptions);
-    
-    // 格式化时间：14:30:45
-    currentTimeEl.textContent = now.toLocaleTimeString('zh-CN', { hour12: false });
-}
+    // 1. 更新日期和时间
+    function updateDateTime() {
+        const now = new Date();
+        const year = now.getFullYear();
+        const month = now.getMonth() + 1; // 月份从1开始
+        const day = now.getDate();
 
-// 从文件加载数据
-function loadDataFromFile(fileName) {
-    return fetch(fileName)
-        .then(response => {
-            if (!response.ok) {
-                throw new Error('文件不存在');
-            }
-            return response.text();
-        })
-        .catch(error => {
-            console.log(`无法加载文件 ${fileName}: ${error.message}`);
-            return '';
-        });
-}
+        const displayMonth = month.toString().padStart(2, '0');
+        const displayDay = day.toString().padStart(2, '0');
+        const hours = now.getHours().toString().padStart(2, '0');
+        const minutes = now.getMinutes().toString().padStart(2, '0');
 
-// 加载每日寄语从文件
-function loadMessageFromFile() {
-    loadDataFromFile(FILE_NAMES.MESSAGE)
-        .then(data => {
-            if (data) {
-                messageContentEl.textContent = data.trim();
-            } else {
-                messageContentEl.textContent = "每一天都是新的开始，给自己一个微笑！";
-            }
-        });
-}
+        let gregorianDateStr = `${year}年${displayMonth}月${displayDay}日`;
 
-// 加载生日数据从文件
-function loadBirthdaysFromFile() {
-    loadDataFromFile(FILE_NAMES.BIRTHDAYS)
-        .then(data => {
-            if (data) {
-                const birthdays = parseBirthdayFile(data);
-                displayBirthdays(birthdays);
-            } else {
-                birthdayListEl.innerHTML = '<p class="no-data">暂无生日数据</p>';
-            }
-        });
-}
-
-// 加载日程安排从文件
-function loadSchedulesFromFile() {
-    loadDataFromFile(FILE_NAMES.SCHEDULES)
-        .then(data => {
-            if (data) {
-                const schedules = parseScheduleFile(data);
-                displaySchedules(schedules);
-            } else {
-                scheduleListEl.innerHTML = '<p class="no-data">暂无日程安排</p>';
-            }
-        });
-}
-
-// 解析生日文件内容
-function parseBirthdayFile(content) {
-    const lines = content.trim().split('\n');
-    const birthdays = [];
-    
-    lines.forEach(line => {
-        if (line.trim()) {
-            const name = line.split(' ')[0];
-            const type = line.split(' ')[1]; // "农历" 或 "阳历"
-            const dateStr = line.split(' ')[2];
-            
-            let date = null;
-            
-            if (type === "农历") {
-                // 农历日期，转换为今年对应的阳历日期
-                date = LunarCalendar.calculateLunarBirthday(line);
-            } else {
-                // 阳历日期，直接解析
-                date = LunarCalendar.parseSolarBirthday(line);
-            }
-            
-            if (date) {
-                birthdays.push({
-                    id: Date.now().toString() + Math.random().toString(36).substr(2, 5),
-                    name: name,
-                    date: date.toISOString().split('T')[0],
-                    lunarType: type === "农历",
-                    originalStr: line
-                });
-            }
-        }
-    });
-    
-    return birthdays;
-}
-
-// 解析日程文件内容
-function parseScheduleFile(content) {
-    const lines = content.trim().split('\n');
-    const schedules = [];
-    
-    lines.forEach(line => {
-        // 预期格式: 2023-05-17 10:00 事件内容 [完成状态]
-        const parts = line.split(' ');
-        if (parts.length >= 3) {
-            let dateStr = parts[0];
-            let timeStr = parts[1];
-            // 检查第二部分是否为时间格式
-            if (timeStr.includes(':')) {
-                // 有时间部分
-                const date = dateStr + 'T' + timeStr;
-                
-                // 检查最后一项是否为完成状态标记
-                let isCompleted = false;
-                let text = '';
-                
-                if (parts[parts.length - 1] === '[已完成]') {
-                    isCompleted = true;
-                    text = parts.slice(2, parts.length - 1).join(' ');
-                } else {
-                    text = parts.slice(2).join(' ');
+        // 添加农历显示
+        try {
+            if (typeof calendar !== 'undefined' && calendar.solarToLunar) {
+                const lunarDate = calendar.solarToLunar(year, month, day);
+                // lunarDate 对象通常包含 lunarYear, lunarMonthName, lunarDayName 等属性
+                // 例如: 农历 二月 初三  或者  农历 闰二月 初三
+                // 有些库可能直接给出如 '二月初三' 的组合字符串，请根据您使用的库调整
+                let lunarDateStr = ` (农历 ${lunarDate.lunarMonthName}${lunarDate.lunarDayName})`;
+                if(lunarDate.isleap) { // 如果是闰月
+                    lunarDateStr = ` (农历 闰${lunarDate.lunarMonthName}${lunarDate.lunarDayName})`;
                 }
-                
-                schedules.push({
-                    id: Date.now().toString() + Math.random().toString(36).substr(2, 5),
-                    date: date,
-                    text: text,
-                    completed: isCompleted
-                });
+                gregorianDateStr += lunarDateStr;
+            } else {
+                console.warn("农历库未加载，无法显示农历日期。");
             }
+        } catch (e) {
+            console.error("转换农历日期时出错:", e);
         }
-    });
-    
-    return schedules;
-}
 
-// 显示生日列表
-function displayBirthdays(birthdays) {
-    if (birthdays.length === 0) {
-        birthdayListEl.innerHTML = '<p class="no-data">暂无近期生日</p>';
-        return;
+        dateDisplay.textContent = gregorianDateStr;
+        timeDisplay.textContent = `${hours} : ${minutes}`;
     }
-    
-    // 清空列表
-    birthdayListEl.innerHTML = '';
-    
-    // 对生日按照日期远近排序
-    const sortedBirthdays = sortBirthdaysByUpcoming(birthdays);
-    
-    // 显示生日列表
-    sortedBirthdays.forEach(birthday => {
-        const daysUntil = getDaysUntilBirthday(birthday.date);
-        const birthdayItem = document.createElement('div');
-        birthdayItem.className = 'birthday-item';
-        
-        // 特殊标记今天生日的人
-        if (daysUntil === 0) {
-            birthdayItem.style.background = 'rgba(255, 188, 73, 0.3)';
-        }
-        
-        let typeLabel = birthday.lunarType ? '<span class="lunar-label">农历</span>' : '';
-        
-        birthdayItem.innerHTML = `
-            <div>
-                <div class="birthday-name">${birthday.name} ${typeLabel}</div>
-                <div class="birthday-date">${formatBirthdayDate(birthday.date)}</div>
-            </div>
-            <div class="birthday-days">${daysUntil === 0 ? '今天' : `${daysUntil}天后`}</div>
-        `;
-        
-        birthdayListEl.appendChild(birthdayItem);
-    });
-}
 
-// 显示日程列表
-function displaySchedules(schedules) {
-    // 清空列表
-    scheduleListEl.innerHTML = '';
-    
-    if (schedules.length === 0) {
-        scheduleListEl.innerHTML = '<p class="no-data">暂无日程安排</p>';
-        return;
-    }
-    
-    // 按日期排序日程
-    const sortedSchedules = sortSchedulesByDate(schedules);
-    
-    // 获取今天的日期
-    const today = new Date();
-    today.setHours(0, 0, 0, 0);
-    
-    // 划分历史和未来日程
-    const upcomingSchedules = [];
-    const pastSchedules = [];
-    
-    sortedSchedules.forEach((schedule) => {
-        const scheduleDate = new Date(schedule.date);
-        scheduleDate.setHours(0, 0, 0, 0);
-        
-        if (scheduleDate >= today) {
-            upcomingSchedules.push(schedule);
-        } else {
-            pastSchedules.push(schedule);
+    // 2. 设置随机壁纸
+    function setRandomWallpaper() {
+        if (wallpapers.length > 0) {
+            const randomIndex = Math.floor(Math.random() * wallpapers.length);
+            bodyElement.style.backgroundImage = `url('${wallpapers[randomIndex]}')`;
         }
-    });
-    
-    // 创建隐藏的历史日程容器
-    if (pastSchedules.length > 0) {
-        const pastContainer = document.createElement('div');
-        pastContainer.className = 'past-schedules-container';
-        
-        pastSchedules.forEach(schedule => {
-            appendScheduleItem(schedule, pastContainer, false);
+    }
+
+    // 3. 加载生日信息
+    function loadBirthdays() {
+        birthdaysList.innerHTML = ''; // 清空现有列表
+        birthdays.forEach(b => {
+            const li = document.createElement('li');
+            li.classList.add('birthday-entry');
+            // 将类型和日期包裹在一个新的 span 中，用于右侧对齐
+            li.innerHTML = `<span class="birthday-name-main">${b.name}</span>` +
+                           `<span class="birthday-info-group">` +
+                               `<span class="birthday-details">${b.type === 'lunar' ? '农历' : '阳历'}</span>` +
+                               `<span class="birthday-original-date">${b.date}</span>` +
+                           `</span>`;
+            birthdaysList.appendChild(li);
         });
-        
-        scheduleListEl.appendChild(pastContainer);
     }
-    
-    // 添加即将到来的日程
-    if (upcomingSchedules.length > 0) {
-        upcomingSchedules.forEach((schedule, index) => {
-            // 第一条即将到来的日程添加箭头标记
-            const isFirst = index === 0;
-            appendScheduleItem(schedule, scheduleListEl, isFirst);
+
+    // 4. 加载想说的话
+    function loadMessages() {
+        messagesList.innerHTML = ''; // 清空现有列表
+        // 按日期排序（可选，如果需要的话）
+        messages.sort((a,b) => new Date(b.date.replace(/\./g, '-')) - new Date(a.date.replace(/\./g, '-')));
+
+        messages.forEach(msg => {
+            const li = document.createElement('li');
+            const contentSpan = document.createElement('span');
+            contentSpan.classList.add('content');
+            contentSpan.textContent = msg.text;
+            
+            const dateTagSpan = document.createElement('span');
+            dateTagSpan.classList.add('date-tag');
+            dateTagSpan.textContent = msg.date;
+            
+            li.appendChild(contentSpan);
+            li.appendChild(dateTagSpan);
+            messagesList.appendChild(li);
         });
-        
-        // 确保第一条即将到来的日程可见
-        if (scheduleListEl.firstChild) {
-            setTimeout(() => {
-                scheduleListEl.scrollTop = 0;
-            }, 100);
-        }
     }
-    
-    function appendScheduleItem(schedule, container, isFirstUpcoming) {
-        const scheduleDate = new Date(schedule.date);
-        const isToday = scheduleDate.toDateString() === today.toDateString();
-        
-        const scheduleItem = document.createElement('div');
-        
-        // 添加不同的样式
-        let itemClass = 'schedule-item';
-        if (schedule.completed) itemClass += ' completed';
-        if (scheduleDate < today && !schedule.completed) itemClass += ' past';
-        if (isToday) itemClass += ' today';
-        if (isFirstUpcoming) itemClass += ' first-upcoming';
-        
-        scheduleItem.className = itemClass;
-        
-        // 添加箭头标记给第一条即将到来的日程
-        const arrowMark = isFirstUpcoming ? '<span class="arrow-mark">&gt;</span>' : '';
-        
-        scheduleItem.innerHTML = `
-            <div>
-                ${arrowMark}
-                <div class="schedule-text">${schedule.text}</div>
-                <div class="schedule-date">${formatScheduleDate(schedule.date)}</div>
-            </div>
-        `;
-        
-        container.appendChild(scheduleItem);
+
+    // 5. 加载日程
+    function loadSchedule() {
+        scheduleList.innerHTML = ''; // 清空现有列表
+        // 可以按日期时间排序
+        schedule.sort((a,b) => {
+            const dateA = new Date(a.datetime.replace('#', ' ').replace(/\./g, '-'));
+            const dateB = new Date(b.datetime.replace('#', ' ').replace(/\./g, '-'));
+            return dateA - dateB;
+        });
+
+        schedule.forEach(item => {
+            const li = document.createElement('li');
+            const [datePart, timePart] = item.datetime.split('#');
+            
+            const contentSpan = document.createElement('span');
+            contentSpan.classList.add('content');
+            contentSpan.textContent = item.event;
+            
+            const dateTimeTagSpan = document.createElement('span');
+            dateTimeTagSpan.classList.add('date-tag'); // 复用样式
+            dateTimeTagSpan.textContent = `${datePart} ${timePart}`;
+            
+            li.appendChild(contentSpan);
+            li.appendChild(dateTimeTagSpan);
+            scheduleList.appendChild(li);
+        });
     }
-}
 
-// 按日期排序日程
-function sortSchedulesByDate(schedules) {
-    return [...schedules].sort((a, b) => {
-        return new Date(a.date) - new Date(b.date);
-    });
-}
 
-// 计算距离生日还有多少天
-function getDaysUntilBirthday(birthdateStr) {
-    const today = new Date();
-    today.setHours(0, 0, 0, 0);
-    
-    // 解析生日日期
-    const birthdate = new Date(birthdateStr);
-    
-    // 创建今年的生日日期
-    const birthdayThisYear = new Date(today.getFullYear(), birthdate.getMonth(), birthdate.getDate());
-    
-    // 如果今年的生日已经过了，计算到明年生日的天数
-    if (birthdayThisYear < today) {
-        birthdayThisYear.setFullYear(today.getFullYear() + 1);
-    }
-    
-    // 计算天数差异
-    const diffTime = birthdayThisYear - today;
-    const diffDays = Math.ceil(diffTime / (1000 * 60 * 60 * 24));
-    
-    return diffDays;
-}
+    // --- 初始化调用 ---
+    setRandomWallpaper(); // 初始设置壁纸
+    updateDateTime(); // 初始更新时间
+    setInterval(updateDateTime, 1000 * 30); // 每30秒更新一次时间，避免过于频繁
 
-// 格式化生日日期
-function formatBirthdayDate(dateStr) {
-    const date = new Date(dateStr);
-    return `${date.getMonth() + 1}月${date.getDate()}日`;
-}
-
-// 日程日期格式化
-function formatScheduleDate(dateStr) {
-    const date = new Date(dateStr);
-    const today = new Date();
-    today.setHours(0, 0, 0, 0);
-    
-    const tomorrow = new Date(today);
-    tomorrow.setDate(tomorrow.getDate() + 1);
-    
-    // 格式化时间
-    const timeStr = date.toTimeString().substring(0, 5);
-    
-    if (isSameDay(date, today)) {
-        return `今天 ${timeStr}`;
-    } else if (isSameDay(date, tomorrow)) {
-        return `明天 ${timeStr}`;
+    // 确保农历库加载完成后再加载生日
+    // 这是一个简化的处理，实际中您可能需要更健壮的库加载检测
+    if (typeof calendar !== 'undefined' && calendar.lunarToSolar) {
+        loadBirthdays();
     } else {
-        return `${date.toLocaleDateString('zh-CN', { month: 'long', day: 'numeric', weekday: 'short' })} ${timeStr}`;
+        console.error("农历转换库 (calendar) 未找到或未正确加载。生日模块可能无法正常显示农历生日。");
+        // 可以尝试只加载阳历生日，或者提示用户
+        // 为了简单起见，这里我们假设如果库不存在，农历生日部分会 gracefully fail (如 loadBirthdays 中处理)
+        loadBirthdays(); // 尝试加载，让其内部处理错误
     }
-}
-
-// 判断两个日期是否是同一天
-function isSameDay(date1, date2) {
-    return date1.getFullYear() === date2.getFullYear() &&
-           date1.getMonth() === date2.getMonth() &&
-           date1.getDate() === date2.getDate();
-}
-
-// 按即将到来的日期排序生日
-function sortBirthdaysByUpcoming(birthdays) {
-    // 复制数组以避免修改原数组
-    const birthdayCopy = [...birthdays];
     
-    // 按照还有多少天过生日排序
-    return birthdayCopy.sort((a, b) => {
-        return getDaysUntilBirthday(a.date) - getDaysUntilBirthday(b.date);
-    });
-}
+    loadMessages();
+    loadSchedule();
 
-// 页面加载时初始化
-document.addEventListener('DOMContentLoaded', init); 
+    // 可以设置壁纸定时更换
+    // setInterval(setRandomWallpaper, 1000 * 60 * 30); // 每30分钟换一次壁纸
+});
+
+// 简易的农历转换函数占位符 - 您需要引入一个实际的农历库
+// 例如：https://github.com/seeconf/lunar (lunar-calendar.js)
+// 或者使用更现代的库如 https://github.com/jjonline/calendar.js (需要调整API调用)
+// 以下是一个非常非常基础的示例，不能用于实际生产，仅为让代码能跑通结构
+if (typeof calendar === 'undefined') {
+    console.warn("警告：未找到 'calendar' 对象。农历转换将不可用。请引入一个农历库。");
+    var calendar = {
+        lunarToSolar: function(year, month, day) {
+            // 这是一个 **错误的、仅供占位** 的实现
+            // 请务必替换为真实的农历转换库
+            console.error("您正在使用一个占位的农历转换函数。请替换为真实的农历库！");
+            if (month === 12 && day === 28 && year === new Date().getFullYear()) { // 粗略模拟妈妈的生日
+                 // 返回一个近似的阳历日期，例如当年1月或2月，具体取决于农历
+                 // 这只是为了避免完全崩溃，实际日期会不准
+                let d = new Date(year, 1, 15); // 假设一个日期
+                return { year: d.getFullYear(), month: d.getMonth() + 1, day: d.getDate() };
+            }
+            // 对于其他农历日期，抛出错误或返回一个明显错误的值
+            // throw new Error("农历转换功能未实现或库未加载");
+            // 或者返回一个使日期计算明显错误的值
+            const fallbackDate = new Date(year, month -1, day); // 直接用阳历月份，会不准
+             return { year: fallbackDate.getFullYear(), month: fallbackDate.getMonth() + 1, day: fallbackDate.getDate() };
+        }
+    };
+} 

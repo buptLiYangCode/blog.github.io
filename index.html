@@ -1,63 +1,42 @@
 <!DOCTYPE html>
-<html lang="zh">
+<html lang="zh-CN">
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>我的个人空间</title>
-    <link rel="stylesheet" href="styles.css">
+    <title>个人主页</title>
+    <link rel="stylesheet" href="style.css">
 </head>
 <body>
-    <div class="overlay"></div>
-    
     <div class="container">
-        <!-- 头部区域 -->
-        <header>
-            <h1 id="current-date"></h1>
-            <p id="current-time"></p>
-        </header>
-        
-        <!-- 主要内容区域 -->
-        <main>
-            <!-- 左侧：生日区域 -->
-            <section class="widget birthday-widget">
-                <h2>生日提醒</h2>
-                <div class="widget-content" id="birthday-list">
-                    <p class="no-data">暂无近期生日</p>
-                    <!-- 生日信息将通过JavaScript动态插入 -->
-                </div>
-            </section>
-            
-            <!-- 中间：每日寄语区域 -->
-            <section class="widget daily-message-widget">
-                <h2>每日寄语</h2>
-                <div class="widget-content">
-                    <div id="daily-message">
-                        <p>今天我想对自己说：</p>
-                        <div id="message-content" class="message-text"></div>
-                    </div>
-                </div>
-            </section>
-            
-            <!-- 右侧：日程安排区域 -->
-            <section class="widget schedule-widget">
-                <h2>日程安排</h2>
-                <div class="widget-content">
-                    <div id="schedule-list" class="scrollable-list">
-                        <!-- 日程将通过JavaScript动态插入 -->
-                    </div>
-                </div>
-            </section>
-        </main>
-        
-        <!-- 底部区域 -->
-        <footer>
-            <div class="file-info">
-                <p>数据从以下文件读取: birthdays.txt、schedules.txt 和 messages.txt</p>
+        <div class="current-datetime">
+            <p id="date-display"></p>
+            <p id="time-display"></p>
+        </div>
+
+        <div class="main-content">
+            <div class="column">
+                <h2>生日</h2>
+                <ul id="birthdays-list">
+                    <!-- 生日项将由JS动态添加 -->
+                </ul>
             </div>
-        </footer>
+
+            <div class="column wide">
+                <h2>一些想说的话</h2>
+                <ul id="messages-list">
+                    <!-- 话语项将由JS动态添加 -->
+                </ul>
+            </div>
+
+            <div class="column">
+                <h2>日程</h2>
+                <ul id="schedule-list">
+                    <!-- 日程项将由JS动态添加 -->
+                </ul>
+            </div>
+        </div>
     </div>
-    
-    <script src="lunar-calendar.js"></script>
+
     <script src="script.js"></script>
 </body>
 </html> 

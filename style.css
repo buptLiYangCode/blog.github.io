@@ -1,0 +1,153 @@
+body {
+    font-family: sans-serif;
+    margin: 0;
+    background-color: #2c3e50; /* 深色背景作为壁纸加载前的占位 */
+    color: #333;
+    display: flex;
+    justify-content: center;
+    align-items: flex-start; /* 顶部对齐 */
+    min-height: 100vh;
+    padding-top: 20px; /* 给顶部一些空间 */
+    background-size: cover; /* 壁纸全屏显示 */
+    background-position: center; /* 壁纸居中 */
+    background-repeat: no-repeat; /* 壁纸不重复 */
+}
+
+.container {
+    width: 1200px;
+    height: 600px;
+    /* background-color: rgba(255, 255, 255, 0.8);  */
+    padding: 20px;
+    border-radius: 8px;
+    /* box-shadow: 0 0 15px rgba(0, 0, 0, 0.1); */
+}
+
+.current-datetime {
+    text-align: center;
+    margin-bottom: 30px;
+}
+
+.current-datetime p {
+    margin: 5px 0;
+    color: #000000; /* 黑色 */
+    font-weight: bold; /* 宋体本身有不同字重，bold 通常会选择粗宋体 */
+    font-family: 'SimSun', 'STSong', 'Songti SC', serif; /* 宋体字体栈 */
+}
+
+#date-display {
+    font-size: 2em;
+}
+
+#time-display {
+    font-size: 3.5em;
+}
+
+.main-content {
+    display: flex;
+    justify-content: space-between;
+    gap: 20px; /* 列之间的间距 */
+}
+
+.column {
+    background-color: rgba(255, 255, 255, 0.1);
+    padding: 15px;
+    border: 1px solid #e74c3c; /* 红色边框 */
+    border-radius: 5px;
+    flex: 1; /* 等分宽度 */
+    min-width: 200px; /* 最小宽度，防止内容过少时变形 */
+}
+
+.column.wide {
+    flex: 2; /* 中间列更宽 */
+}
+
+.column h2 {
+    text-align: center;
+    color: #070707; /* 您设置的近黑色 */
+    margin-top: 0;
+    border-bottom: 1px solid #e74c3c;
+    padding-bottom: 10px;
+    margin-bottom: 15px;
+    font-family: 'SimSun', 'STSong', 'Songti SC', serif; /* 宋体字体栈 */
+    font-weight: bold; /* 确保粗体，对于宋体标题通常希望是粗体 */
+}
+
+.column ul {
+    list-style: none;
+    padding: 0;
+    margin: 0;
+}
+
+.column ul li {
+    background-color: rgba(255, 255, 255, 0.7);
+    border: 1px solid #e74c3c; /* 红色边框 */
+    border-radius: 4px;
+    padding: 10px;
+    margin-bottom: 10px;
+    display: flex; /* 默认用于 messages 和 schedule */
+    justify-content: space-between; /* 默认用于 messages 和 schedule */
+    align-items: center; /* 默认用于 messages 和 schedule */
+}
+
+/* 生日列表项的特定样式 */
+.column ul li.birthday-entry {
+    display: flex; /* 确保是 flex 容器 */
+    flex-direction: row;
+    align-items: baseline;
+    justify-content: space-between; /* 实现左右对齐的关键 */
+}
+
+.column ul li .birthday-name-main {
+    /* font-weight: bold; */ /* 移除或注释掉此行以取消加粗 */
+    font-size: 1.1em;
+    color: #333;
+}
+
+.birthday-info-group {
+    display: flex; /* 使内部的类型和日期在同一行 */
+    align-items: baseline;
+}
+
+.column ul li .birthday-details {
+    font-size: 0.9em;
+    color: #555;
+    margin-right: 5px; /* 在类型和日期之间添加一点固定间距 */
+}
+
+.column ul li .birthday-original-date {
+    font-size: 0.9em;
+    color: #777;
+}
+
+.column ul li .content { /* For messages and schedule */
+    flex-grow: 1;
+}
+
+.column ul li .date-tag,
+.column ul li .time-tag {
+    font-size: 0.9em;
+    color: #555;
+    margin-left: 10px;
+    white-space: nowrap; /* 防止日期换行 */
+}
+
+/* 响应式设计：小屏幕下垂直排列 */
+@media (max-width: 768px) {
+    .main-content {
+        flex-direction: column;
+    }
+    .column {
+        min-width: unset;
+        width: 100%;
+        margin-bottom: 20px;
+    }
+    .column.wide {
+        flex: 1;
+    }
+    #date-display {
+        font-size: 2em;
+    }
+    #time-display {
+        font-size: 3em;
+    }
+} 

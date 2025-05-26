@@ -1,522 +1,153 @@
-/* 全局样式 */
-:root {
-    --primary-color: #5c6bc0;
-    --secondary-color: #7986cb;
-    --accent-color: #8e99f3;
-    --text-color: #fff;
-    --text-shadow: 0 1px 3px rgba(0, 0, 0, 0.3);
-    --bg-overlay: rgba(0, 0, 0, 0.4);
-    --card-bg: rgba(255, 255, 255, 0.2);
-    --card-bg-hover: rgba(255, 255, 255, 0.25);
-    --card-shadow: 0 4px 12px rgba(0, 0, 0, 0.15);
-    --border-radius: 12px;
-    --transition: all 0.3s ease;
-    --backdrop-blur: blur(10px);
-}
-
-* {
-    box-sizing: border-box;
-    margin: 0;
-    padding: 0;
-}
-
 body {
-    font-family: 'Helvetica Neue', Arial, sans-serif;
-    line-height: 1.6;
-    color: var(--text-color);
-    min-height: 100vh;
-    background-size: cover;
-    background-position: center;
-    background-repeat: no-repeat;
-    background-attachment: fixed;
-    background-color: #2c3e50; /* 默认背景颜色 */
-    background-image: linear-gradient(135deg, #3498db, #8e44ad); /* 默认渐变背景 */
-    position: relative;
-    overflow-x: hidden;
-    transition: background-image 1s ease-in-out;
-}
-
-/* 背景蒙层 */
-.overlay {
-    position: fixed;
-    top: 0;
-    left: 0;
-    width: 100%;
-    height: 100%;
-    background-color: var(--bg-overlay);
-    z-index: -1;
-}
-
-/* 主容器样式 */
-.container {
-    max-width: 1200px;
-    margin: 0 auto;
-    padding: 20px;
-    height: 100vh;
+    font-family: sans-serif;
+    margin: 0;
+    background-color: #2c3e50; /* 深色背景作为壁纸加载前的占位 */
+    color: #333;
     display: flex;
-    flex-direction: column;
-}
-
-/* 头部样式 */
-header {
-    text-align: center;
-    padding: 20px 0;
-    margin-bottom: 30px;
-    text-shadow: var(--text-shadow);
-}
-
-header h1 {
-    font-size: 2.5rem;
-    margin-bottom: 5px;
-    font-weight: 800;
-}
-
-header p {
-    font-size: 1.2rem;
-    opacity: 0.9;
-}
-
-/* 主要内容区域 */
-main {
-    display: grid;
-    grid-template-columns: 1fr 1.5fr 1fr;
-    gap: 20px;
-    flex-grow: 1;
-}
-
-/* 卡片组件样式 */
-.widget {
-    background: var(--card-bg);
-    backdrop-filter: var(--backdrop-blur);
-    -webkit-backdrop-filter: var(--backdrop-blur);
-    border-radius: var(--border-radius);
-    padding: 20px;
-    box-shadow: var(--card-shadow);
-    transition: var(--transition);
-    height: 100%;
-    display: flex;
-    flex-direction: column;
-}
-
-.widget:hover {
-    background: var(--card-bg-hover);
-    transform: translateY(-5px);
-}
-
-.widget h2 {
-    margin-bottom: 15px;
-    font-size: 1.5rem;
-    text-shadow: var(--text-shadow);
-    text-align: center;
-    padding-bottom: 10px;
-    border-bottom: 1px solid rgba(255, 255, 255, 0.1);
-}
-
-.widget-content {
-    flex-grow: 1;
-    overflow-y: auto;
-    max-height: 400px;
-    scrollbar-width: thin;
-}
-
-/* 各区域特殊样式 */
-
-/* 生日区域 */
-.birthday-item {
-    padding: 10px;
-    margin-bottom: 10px;
-    border-radius: 8px;
-    background: rgba(255, 255, 255, 0.1);
-    display: flex;
-    justify-content: space-between;
-    align-items: center;
-}
-
-.birthday-name {
-    font-weight: bold;
-}
-
-.birthday-date {
-    opacity: 0.8;
-}
-
-.birthday-days {
-    background: var(--accent-color);
-    padding: 2px 8px;
-    border-radius: 10px;
-    font-size: 0.8rem;
-}
-
-.no-data {
-    text-align: center;
-    opacity: 0.7;
-    margin-top: 20px;
-}
-
-/* 每日寄语区域 */
-#daily-message {
-    padding: 15px;
-    display: flex;
-    flex-direction: column;
-    height: 100%;
-}
-
-#daily-message p {
-    margin-bottom: 10px;
-    font-size: 1.1rem;
-}
-
-#message-content {
-    flex-grow: 1;
-    background: rgba(255, 255, 255, 0.1);
-    border-radius: 8px;
-    padding: 15px;
-    margin-bottom: 15px;
-    min-height: 150px;
-    line-height: 1.8;
-    font-size: 1.2rem;
-    outline: none;
-}
-
-#message-content:focus {
-    background: rgba(255, 255, 255, 0.15);
-}
-
-/* 日程安排区域 */
-.schedule-item {
-    padding: 10px 15px;
-    margin-bottom: 10px;
-    border-radius: 8px;
-    background: rgba(255, 255, 255, 0.1);
-    display: flex;
-    justify-content: space-between;
-    align-items: center;
-}
-
-.schedule-item.today {
-    background: rgba(76, 175, 80, 0.2);
-    border-left: 3px solid rgba(76, 175, 80, 0.8);
-}
-
-.schedule-item.past {
-    background: rgba(255, 255, 255, 0.05);
-}
-
-.schedule-item.completed {
-    opacity: 0.6;
-}
-
-.schedule-item .schedule-text {
-    font-weight: bold;
-    margin-bottom: 5px;
-}
-
-.schedule-item .schedule-date {
-    font-size: 0.85rem;
-    opacity: 0.8;
-    display: flex;
-    align-items: center;
-}
-
-.schedule-item .schedule-date::before {
-    content: "\1F550"; /* 时钟表情符号 */
-    margin-right: 5px;
-    font-size: 0.9rem;
-}
-
-.add-schedule {
-    display: flex;
-    margin-top: 15px;
-}
-
-#new-schedule {
-    flex-grow: 1;
-    padding: 10px;
-    border: none;
-    border-radius: 5px 0 0 5px;
-    background: rgba(255, 255, 255, 0.2);
-    color: var(--text-color);
-    outline: none;
-}
-
-#new-schedule::placeholder {
-    color: rgba(255, 255, 255, 0.7);
-}
-
-/* 按钮样式 */
-.btn-add, .btn-save, .btn-submit, .upload-btn {
-    background: var(--accent-color);
-    color: white;
-    border: none;
-    padding: 10px 15px;
-    border-radius: 5px;
-    cursor: pointer;
-    font-weight: bold;
-    transition: var(--transition);
-}
-
-.btn-add:hover, .btn-save:hover, .btn-submit:hover, .upload-btn:hover {
-    background: var(--primary-color);
-    transform: translateY(-2px);
-}
-
-.add-schedule .btn-add {
-    border-radius: 0 5px 5px 0;
-}
-
-/* 底部区域 */
-footer {
-    margin-top: 20px;
-    text-align: center;
-    padding: 15px 0;
-}
-
-.upload-btn {
-    display: inline-block;
-    padding: 8px 20px;
-}
-
-/* 模态框样式 */
-.modal {
-    display: none;
-    position: fixed;
-    top: 0;
-    left: 0;
-    width: 100%;
-    height: 100%;
-    background-color: rgba(0, 0, 0, 0.7);
-    z-index: 1000;
     justify-content: center;
-    align-items: center;
+    align-items: flex-start; /* 顶部对齐 */
+    min-height: 100vh;
+    padding-top: 20px; /* 给顶部一些空间 */
+    background-size: cover; /* 壁纸全屏显示 */
+    background-position: center; /* 壁纸居中 */
+    background-repeat: no-repeat; /* 壁纸不重复 */
 }
 
-.modal.show {
-    display: flex;
-}
-
-.modal-content {
-    background: rgba(30, 30, 30, 0.95);
-    backdrop-filter: var(--backdrop-blur);
-    padding: 30px;
-    border-radius: var(--border-radius);
-    width: 90%;
-    max-width: 500px;
-    position: relative;
-}
-
-.close-btn {
-    position: absolute;
-    top: 10px;
-    right: 15px;
-    font-size: 24px;
-    cursor: pointer;
-}
-
-.form-group {
-    margin-bottom: 20px;
-}
-
-.form-group label {
-    display: block;
-    margin-bottom: 8px;
-}
-
-.form-group input {
-    width: 100%;
-    padding: 10px;
-    border: 1px solid rgba(255, 255, 255, 0.2);
-    background: rgba(255, 255, 255, 0.1);
-    border-radius: 5px;
-    color: white;
-}
-
-/* 控制按钮样式 */
-.control-btn {
-    background: none;
-    border: none;
-    color: rgba(255, 255, 255, 0.7);
-    cursor: pointer;
-    transition: var(--transition);
-    margin-left: 5px;
-}
-
-.control-btn:hover {
-    color: white;
-}
-
-/* 响应式设计 */
-@media (max-width: 900px) {
-    main {
-        grid-template-columns: 1fr;
-        gap: 30px;
-    }
-
-    .widget {
-        height: auto;
-    }
-
-    .widget-content {
-        max-height: 300px;
-    }
-}
-
-@media (max-width: 600px) {
-    header h1 {
-        font-size: 2rem;
-    }
-
-    header p {
-        font-size: 1rem;
-    }
-}
-
-/* 滚动列表样式 */
-.scrollable-list {
-    max-height: 320px;
-    overflow-y: auto;
-    margin-bottom: 10px;
-    padding-right: 5px;
-    scrollbar-width: thin;
-}
-
-.scrollable-list::-webkit-scrollbar {
-    width: 6px;
-}
-
-.scrollable-list::-webkit-scrollbar-track {
-    background: rgba(255, 255, 255, 0.1);
-    border-radius: 3px;
-}
-
-.scrollable-list::-webkit-scrollbar-thumb {
-    background: rgba(255, 255, 255, 0.3);
-    border-radius: 3px;
-}
-
-.scrollable-list::-webkit-scrollbar-thumb:hover {
-    background: rgba(255, 255, 255, 0.5);
-}
-
-/* 通知样式 */
-.notification {
-    position: fixed;
-    bottom: 20px;
-    right: 20px;
-    background: rgba(0, 0, 0, 0.7);
-    color: white;
-    padding: 10px 20px;
-    border-radius: 5px;
-    z-index: 1000;
-    transition: opacity 0.3s, transform 0.3s;
-    opacity: 0;
-    transform: translateY(20px);
-}
-
-.notification.show {
-    opacity: 1;
-    transform: translateY(0);
-}
-
-/* 日程分隔标题 */
-.section-title {
-    padding: 8px 10px;
-    margin: 15px 0 10px 0;
-    font-weight: bold;
-    text-align: center;
-    border-radius: 4px;
-    font-size: 0.9rem;
-    text-transform: uppercase;
-    letter-spacing: 1px;
-}
-
-.section-title.upcoming {
-    background: rgba(76, 175, 80, 0.2);
-    color: rgba(255, 255, 255, 0.9);
-    border-left: 3px solid rgba(76, 175, 80, 0.8);
-}
-
-.section-title.past {
-    background: rgba(158, 158, 158, 0.15);
-    color: rgba(255, 255, 255, 0.7);
-    border-left: 3px solid rgba(158, 158, 158, 0.5);
-    margin-top: 25px;
-}
-
-/* 底部文件信息样式 */
-.file-info {
-    margin-top: 15px;
-    font-size: 0.85rem;
-    opacity: 0.7;
-}
-
-.file-info p {
-    margin: 3px 0;
-}
-
-/* 农历标签样式 */
-.lunar-label {
-    display: inline-block;
-    font-size: 0.7rem;
-    padding: 1px 5px;
-    background: rgba(255, 148, 112, 0.3);
-    border-radius: 3px;
-    margin-left: 5px;
-    vertical-align: middle;
-}
-
-/* 消息文本样式 */
-.message-text {
-    flex-grow: 1;
-    background: rgba(255, 255, 255, 0.1);
+.container {
+    width: 1200px;
+    height: 600px;
+    /* background-color: rgba(255, 255, 255, 0.8);  */
+    padding: 20px;
     border-radius: 8px;
+    /* box-shadow: 0 0 15px rgba(0, 0, 0, 0.1); */
+}
+
+.current-datetime {
+    text-align: center;
+    margin-bottom: 30px;
+}
+
+.current-datetime p {
+    margin: 5px 0;
+    color: #000000; /* 黑色 */
+    font-weight: bold; /* 宋体本身有不同字重，bold 通常会选择粗宋体 */
+    font-family: 'SimSun', 'STSong', 'Songti SC', serif; /* 宋体字体栈 */
+}
+
+#date-display {
+    font-size: 2em;
+}
+
+#time-display {
+    font-size: 3.5em;
+}
+
+.main-content {
+    display: flex;
+    justify-content: space-between;
+    gap: 20px; /* 列之间的间距 */
+}
+
+.column {
+    background-color: rgba(255, 255, 255, 0.1);
     padding: 15px;
+    border: 1px solid #e74c3c; /* 红色边框 */
+    border-radius: 5px;
+    flex: 1; /* 等分宽度 */
+    min-width: 200px; /* 最小宽度，防止内容过少时变形 */
+}
+
+.column.wide {
+    flex: 2; /* 中间列更宽 */
+}
+
+.column h2 {
+    text-align: center;
+    color: #070707; /* 您设置的近黑色 */
+    margin-top: 0;
+    border-bottom: 1px solid #e74c3c;
+    padding-bottom: 10px;
     margin-bottom: 15px;
-    min-height: 150px;
-    line-height: 1.8;
-    font-size: 1.2rem;
+    font-family: 'SimSun', 'STSong', 'Songti SC', serif; /* 宋体字体栈 */
+    font-weight: bold; /* 确保粗体，对于宋体标题通常希望是粗体 */
 }
 
-/* 日程显示样式修改 */
-.past-schedules-container {
-    position: absolute;
-    top: -9999px; /* 隐藏在视图之外 */
-    left: 0;
-    width: 100%;
-    opacity: 0.6;
+.column ul {
+    list-style: none;
+    padding: 0;
+    margin: 0;
 }
 
-/* 滚动后才显示过去的日程 */
-.widget-content:focus-within .past-schedules-container,
-.widget-content:hover .past-schedules-container {
-    position: static;
-    margin-bottom: 15px;
+.column ul li {
+    background-color: rgba(255, 255, 255, 0.7);
+    border: 1px solid #e74c3c; /* 红色边框 */
+    border-radius: 4px;
+    padding: 10px;
+    margin-bottom: 10px;
+    display: flex; /* 默认用于 messages 和 schedule */
+    justify-content: space-between; /* 默认用于 messages 和 schedule */
+    align-items: center; /* 默认用于 messages 和 schedule */
 }
 
-/* 第一条即将到来的日程样式 */
-.first-upcoming {
-    position: relative;
-    border-left: 3px solid rgba(76, 175, 80, 0.8);
-    background: rgba(76, 175, 80, 0.15) !important;
+/* 生日列表项的特定样式 */
+.column ul li.birthday-entry {
+    display: flex; /* 确保是 flex 容器 */
+    flex-direction: row;
+    align-items: baseline;
+    justify-content: space-between; /* 实现左右对齐的关键 */
 }
 
-/* 箭头标记样式 */
-.arrow-mark {
-    position: absolute;
-    left: -15px;
-    top: 50%;
-    transform: translateY(-50%);
-    color: rgba(76, 175, 80, 0.9);
-    font-weight: bold;
-    font-size: 1.2rem;
+.column ul li .birthday-name-main {
+    /* font-weight: bold; */ /* 移除或注释掉此行以取消加粗 */
+    font-size: 1.1em;
+    color: #333;
 }
 
-/* 确保schedule-widget内容容器有相对定位，以便正确放置历史日程 */
-.schedule-widget .widget-content {
-    position: relative;
-    overflow: hidden;
+.birthday-info-group {
+    display: flex; /* 使内部的类型和日期在同一行 */
+    align-items: baseline;
 }
 
-.scrollable-list {
-    position: relative;
-    padding-left: 15px; /* 为箭头留出空间 */
+.column ul li .birthday-details {
+    font-size: 0.9em;
+    color: #555;
+    margin-right: 5px; /* 在类型和日期之间添加一点固定间距 */
+}
+
+.column ul li .birthday-original-date {
+    font-size: 0.9em;
+    color: #777;
+}
+
+.column ul li .content { /* For messages and schedule */
+    flex-grow: 1;
+}
+
+.column ul li .date-tag,
+.column ul li .time-tag {
+    font-size: 0.9em;
+    color: #555;
+    margin-left: 10px;
+    white-space: nowrap; /* 防止日期换行 */
+}
+
+/* 响应式设计：小屏幕下垂直排列 */
+@media (max-width: 768px) {
+    .main-content {
+        flex-direction: column;
+    }
+    .column {
+        min-width: unset;
+        width: 100%;
+        margin-bottom: 20px;
+    }
+    .column.wide {
+        flex: 1;
+    }
+    #date-display {
+        font-size: 2em;
+    }
+    #time-display {
+        font-size: 3em;
+    }
 } 

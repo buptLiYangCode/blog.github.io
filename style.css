@@ -1,5 +1,11 @@
+html {
+    overflow-x: hidden; /* 禁止html元素产生水平滚动条 */
+    overflow-y: hidden; /* 新增：禁止html元素产生垂直滚动条 */
+    height: 100%; /* 配合body的min-height使用 */
+}
+
 body {
-    font-family: sans-serif;
+    font-family: 'SimSun', 'STSong', 'Songti SC', serif; /* 宋体字体栈 */
     margin: 0;
     background-color: #2c3e50; /* 深色背景作为壁纸加载前的占位 */
     color: #333;
@@ -8,18 +14,21 @@ body {
     align-items: flex-start; /* 顶部对齐 */
     min-height: 100vh;
     padding-top: 20px; /* 给顶部一些空间 */
-    background-size: cover; /* 壁纸全屏显示 */
-    background-position: center; /* 壁纸居中 */
-    background-repeat: no-repeat; /* 壁纸不重复 */
+    background-size: cover;   /* 保持背景覆盖并裁剪 */
+    background-position: center; /* 背景居中 */
+    background-repeat: no-repeat; /* 背景不重复 */
+    background-attachment: fixed; /* 新增：使背景相对于视口固定 */
+    /* width: 100vw; */ /* 或者尝试这个，确保body宽度不超过视口，但通常 overflow-x:hidden on html 就够了 */
 }
 
 .container {
-    width: 1200px;
-    height: 600px;
-    /* background-color: rgba(255, 255, 255, 0.8);  */
+    width: 90%; /* 您之前的宽度 */
+    max-width: 1200px; /* 您之前的最大宽度 */
+    background-color: rgba(255, 255, 255, 0.1); /* 您之前的背景色 */
     padding: 20px;
     border-radius: 8px;
-    /* box-shadow: 0 0 15px rgba(0, 0, 0, 0.1); */
+    overflow: hidden; /*  <<<< 这行是关键，它会移除滚动条并裁剪内容  */
+    margin: 0 auto; /* 用于水平居中 */
 }
 
 .current-datetime {

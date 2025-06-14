@@ -4,7 +4,7 @@
 document.addEventListener('DOMContentLoaded', () => {
     // --- 数据定义 ---
     const wallpapers = [
-        "https://img.picui.cn/free/2025/05/26/68346a0cae79a.jpg", // 示例图床 API，您可以替换成您的图床链接
+        "https://img.picui.cn/free/2025/06/14/684d0162001db.jpg", // 示例图床 API，您可以替换成您的图床链接
     ];
 
     const birthdays = [

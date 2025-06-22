@@ -4,12 +4,13 @@
 document.addEventListener('DOMContentLoaded', () => {
     // --- 数据定义 ---
     const wallpapers = [
-        "https://img.picui.cn/free/2025/06/14/684d0162001db.jpg", // 示例图床 API，您可以替换成您的图床链接
+        "https://img.picui.cn/free/2025/06/23/685845b7b2060.jpg", // 示例图床 API，您可以替换成您的图床链接
     ];
 
     const birthdays = [
         { name: "妈妈", type: "lunar", date: "12.28" }, // 农历12月28日
         { name: "弟弟", type: "lunar", date: "10.01" }, // 阳历10月01日
+        { name: "爸爸", type: "lunar", date: "5.29" }, // 阳历10月01日
         // 添加更多生日
     ];
 
